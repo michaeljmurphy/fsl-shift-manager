@@ -2,12 +2,15 @@ trigger EventFslShiftMmgmtTrigger on Event (before insert
                                             , before update
                                             , before delete) {
     if(Trigger.isBefore) {
+        EventFslShiftMgmtTh e;
         if(Trigger.isInsert) {
-            EventFslShiftMgmtTh(Trigger.new);
+            e = new EventFslShiftMgmtTh(Trigger.new, false);
         } else if (Trigger.isUpdate) {
-            EventFslShiftMgmtTh(Trigger.newMap, Trigger.oldMap);
+            e = new EventFslShiftMgmtTh(Trigger.newMap, Trigger.oldMap);
         } else if (Trigger.isDelete) {
-            EventFslShiftMgmtTh(Trigger.old);
+            e = new EventFslShiftMgmtTh(Trigger.old, true);
         }
+
+        e.execute();
     }
 }

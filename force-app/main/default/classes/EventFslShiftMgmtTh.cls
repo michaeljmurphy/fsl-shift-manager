@@ -1,35 +1,34 @@
 public with sharing class EventFslShiftMgmtTh {
-    List<Event> _newList;
-    List<Event> _oldList;
-    Map<Id, Event> _newMap;
-    Map<Id, Event> _oldMap;
-    Map<Id, Event> _recordsToProcess;
+    List<Event> newList;
+    List<Event> oldList;
+    Map<Id, Event> newMap;
+    Map<Id, Event> oldMap;
 
 
     public EventFslShiftMgmtTh(List<Event> trigList, Boolean isDelete) {
         if(isDelete) {
-            this._newList = trigList;
+            this.newList = trigList;
         } else {
-            this._oldList = trigList;
+            this.oldList = trigList;
         }
     }
 
     public EventFslShiftMgmtTh(Map<Id, Event> newMap, Map<Id, Event> oldMap) {
-        this._newMap = newMap;
-        this._oldMap = oldMap;
+        this.newMap = newMap;
+        this.oldMap = oldMap;
     }
 
 
-    public void filterRecords() {
-        if(_newList != null && !_newList.isBlank()) {
-            execute(genMapFromList(_newList));
+    public void execute() {
+        if(newList != null && !newList.isEmpty()) {
+            execute(new Map<Id, Event> ( newList ));
             return;
-        } else if(_oldList != null && !_oldList.isBlank()) {
-            execute(genMapFromList(_oldList));
+        } else if(oldList != null && !oldList.isEmpty()) {
+            execute(new Map<Id, Event> ( oldList ));
             return;
         }
 
-        execute(_newMap, _oldMap);
+        execute(newMap, oldMap);
     }
 
 
@@ -47,10 +46,9 @@ public with sharing class EventFslShiftMgmtTh {
         try {
             delete [SELECT Id
                     FROM ServiceTerritoryMember
-                    WHERE Shift_ID__c
-                    IN :shiftIds];
+                    WHERE Shift_ID__c IN :shiftIds];
         } catch (Exception e) {
-            Databse.rollback(sp);
+            Database.rollback(sp);
             
             // throw error to user
             throw new EventFslShiftMgmtThException('Error deleting records!');
@@ -68,19 +66,20 @@ public with sharing class EventFslShiftMgmtTh {
         for(Event i : recordsToProcess.values())
             { userIds.add(i.OwnerId); }
 
-        Map<Id, ServiceResource> srIdToServiceResource = ([SELECT Id, RelatedRecordId
-                                                           FROM ServiceResource
-                                                           WHERE RelatedRecordId
-                                                           IN :userIds]);
+        Map<Id, ServiceResource> srIdToServiceResource
+            = new Map<Id, ServiceResource>([SELECT Id, RelatedRecordId
+                                            FROM ServiceResource
+                                            WHERE RelatedRecordId
+                                            IN :userIds]);
         for(Id i : srIdToServiceResource.keySet())
             { userIdToSrId.put(srIdToServiceResource.get(i).RelatedRecordId, i); }
 
         for(Id i : recordsToProcess.keySet()) {
             Event thisEvent = recordsToProcess.get(i);
 
-            thisEvent.Shift_ID__c = userIdToSrId.get(thisEvent.OwnerId)
-                + thisEvent.Service_Territory__c
-                + thisEvent.Operating_Hours__c
+            thisEvent.Shift_ID__c = String.valueOf(userIdToSrId.get(thisEvent.OwnerId))
+                + String.valueOf(thisEvent.Service_Territory__c)
+                + String.valueOf(thisEvent.Operating_Hours__c)
                 + String.valueOf(thisEvent.StartDateTime)
                 + String.valueOf(thisEvent.EndDateTime);
 
