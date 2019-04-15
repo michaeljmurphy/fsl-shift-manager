@@ -33,8 +33,8 @@ public with sharing class EventFslShiftMgmtTh {
     }
 
 
-    public void execute(Map<Id, Event> recordsToDelete
-                        , Map<Id, Event> recordsToProcess) {
+    public void execute(Map<Id, Event> recordsToProcess
+                        , Map<Id, Event> recordsToDelete) {
         SavePoint sp = Database.setSavePoint();
 
         Set<String> shiftIds = new Set<String>();
@@ -60,8 +60,40 @@ public with sharing class EventFslShiftMgmtTh {
     }
 
     public void execute(Map<Id, Event> recordsToProcess) {
+
+        List<ServiceTerritoryMember> stmsToInsert = new List<ServiceTerritoryMember>();
+        Set<Id> userIds = new Set<Id>();
+        Map<Id, Id> userIdToSrId = new Map<Id, Id> ();
+        
+        for(Event i : recordsToProcess.values())
+            { userIds.add(i.OwnerId); }
+
+        Map<Id, ServiceResource> srIdToServiceResource = ([SELECT Id, RelatedRecordId
+                                                           FROM ServiceResource
+                                                           WHERE RelatedRecordId
+                                                           IN :userIds]);
+        for(Id i : srIdToServiceResource.keySet())
+            { userIdToSrId.put(srIdToServiceResource.get(i).RelatedRecordId, i); }
+
         for(Id i : recordsToProcess.keySet()) {
-            
+            Event thisEvent = recordsToProcess.get(i);
+
+            thisEvent.Shift_ID__c = userIdToSrId.get(thisEvent.OwnerId)
+                + thisEvent.Service_Territory__c
+                + thisEvent.Operating_Hours__c
+                + String.valueOf(thisEvent.StartDateTime)
+                + String.valueOf(thisEvent.EndDateTime);
+
+            stmsToInsert.add(new ServiceTerritoryMember(ServiceTerritoryId = thisEvent.Service_Territory__c
+                                                        , OperatingHoursId = thisEvent.Operating_Hours__c
+                                                        , ServiceResourceId = userIdToSrId.get(thisEvent.OwnerId)));
+
+            try {
+                insert stmsToInsert;
+            } catch (Exception e) {
+                throw new EventFslShiftMgmtThException('Error Saving Service Territory Member Records!'
+                                                       + e.getMessage());
+            }
         }
     }
 
