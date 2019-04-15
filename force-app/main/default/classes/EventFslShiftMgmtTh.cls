@@ -33,7 +33,7 @@ public with sharing class EventFslShiftMgmtTh {
             List<Event> toProcess = filter(oldList);
 
             if(!toProcess.isEmpty())
-                { execute(toProcess); }
+                { doDelete(new Map<Id, Event> (toProcess) ); }
 
             return;
         } else {
@@ -53,8 +53,6 @@ public with sharing class EventFslShiftMgmtTh {
             if(i.RecordTypeId == rtypeId)
                 { toReturn.add(i); }
         }
-
-        System.debug('toProcess: ' + toReturn);
 
         return toReturn;
     }
@@ -76,6 +74,13 @@ public with sharing class EventFslShiftMgmtTh {
 
     public void execute(Map<Id, Event> recordsToProcess
                         , Map<Id, Event> recordsToDelete) {
+        doDelete(recordsToDelete);
+
+        execute(recordsToProcess.values());
+    }
+
+
+    public void doDelete(Map<Id, Event> recordsToDelete) {
         SavePoint sp = Database.setSavePoint();
 
         Set<String> shiftIds = new Set<String>();
@@ -95,22 +100,16 @@ public with sharing class EventFslShiftMgmtTh {
             // throw error to user
             throw new EventFslShiftMgmtThException('Error deleting records!' + e.getMessage());
         }
-
-        execute(recordsToProcess.values());
     }
 
 
     public void execute(List<Event> recordsToProcess) {
-        System.debug('Execute');
-
         List<ServiceTerritoryMember> stmsToInsert = new List<ServiceTerritoryMember>();
         Set<Id> userIds = new Set<Id>();
         Map<Id, Id> userIdToSrId = new Map<Id, Id> ();
         
         for(Event i : recordsToProcess)
             { userIds.add(i.OwnerId); }
-
-        System.debug('userIds: ' + userIds);
 
         Map<Id, ServiceResource> srIdToServiceResource
             = new Map<Id, ServiceResource>([SELECT Id, RelatedRecordId
