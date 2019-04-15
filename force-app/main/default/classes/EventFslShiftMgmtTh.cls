@@ -93,7 +93,7 @@ public with sharing class EventFslShiftMgmtTh {
             Database.rollback(sp);
             
             // throw error to user
-            throw new EventFslShiftMgmtThException('Error deleting records!');
+            throw new EventFslShiftMgmtThException('Error deleting records!' + e.getMessage());
         }
 
         execute(recordsToProcess.values());
@@ -121,17 +121,20 @@ public with sharing class EventFslShiftMgmtTh {
             { userIdToSrId.put(srIdToServiceResource.get(i).RelatedRecordId, i); }
 
         for(Event i : recordsToProcess) {
-
-            i.Shift_ID__c = String.valueOf(userIdToSrId.get(i.OwnerId))
+            String shiftId = String.valueOf(userIdToSrId.get(i.OwnerId))
                 + String.valueOf(i.Service_Territory__c)
                 + String.valueOf(i.Operating_Hours__c)
                 + String.valueOf(i.StartDateTime)
                 + String.valueOf(i.EndDateTime);
 
+
+            i.Shift_ID__c = shiftId;
+
             stmsToInsert.add(new ServiceTerritoryMember(ServiceTerritoryId = i.Service_Territory__c
                                                         , OperatingHoursId = i.Operating_Hours__c
                                                         , EffectiveStartDate = i.StartDateTime
                                                         , EffectiveEndDate = i.EndDateTime
+                                                        , Shift_Id__c = shiftId
                                                         , ServiceResourceId = userIdToSrId.get(i.OwnerId)));
         }
 
