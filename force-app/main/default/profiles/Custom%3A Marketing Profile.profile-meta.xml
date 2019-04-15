@@ -40,6 +40,13 @@
         <field>Task.Shift_ID__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <layoutAssignments>
+        <layout>Event-Shift Management Layout</layout>
+        <recordType>Event.Shift_Management</recordType>
+    </layoutAssignments>
+    <layoutAssignments>
+        <layout>ServiceTerritoryMember-Service Territory Member Layout</layout>
+    </layoutAssignments>
     <recordTypeVisibilities>
         <default>true</default>
         <recordType>Event.Default</recordType>
