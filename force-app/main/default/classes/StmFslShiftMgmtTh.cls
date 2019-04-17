@@ -8,7 +8,7 @@ public with sharing class StmFslShiftMgmtTh extends AbstractFslShiftMgmt {
         if(!isDelete) {
             this.newList = newList;
         } else {
-            this.oldList = oldList;
+            this.oldList = newList;
         }
     }
 
@@ -23,20 +23,20 @@ public with sharing class StmFslShiftMgmtTh extends AbstractFslShiftMgmt {
             { return; }
 
         if(newList != null && !newList.isEmpty()) {
+            recurse_handler = true;
             
             execute(newList);
 
-            recurse_handler = true;
             return;
         } else if (oldList != null && !oldList.isEmpty()) {
+            recurse_handler = true;
             
             doDelete(new Map<Id, ServiceTerritoryMember> (oldList));
 
-            recurse_handler = true;
             return;
         } else {
-            execute(newMap, oldMap);
             recurse_handler = true;
+            execute(newMap, oldMap);
         }
     }
 

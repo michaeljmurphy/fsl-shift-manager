@@ -26,26 +26,29 @@ public with sharing class EventFslShiftMgmtTh extends AbstractFslShiftMgmt {
             { return; }
         
         if(newList != null && !newList.isEmpty()) {
+            recurse_handler = true;
+
             List<Event> toProcess = filter(newList);
             
             if(!toProcess.isEmpty())
                 { execute(toProcess); }
 
-            recurse_handler = true;
+     
             return;
         } else if (oldList != null && !oldList.isEmpty()) {
+            recurse_handler = true;
+            
             List<Event> toProcess = filter(oldList);
 
             if(!toProcess.isEmpty())
                 { doDelete(new Map<Id, Event> (toProcess) ); }
 
-            recurse_handler = true;
             return;
         } else {
+            recurse_handler = true;
+            
             filter();
             execute(newMap, oldMap);
-
-            recurse_handler = true;
         }
     }
 
