@@ -1,9 +1,9 @@
-public with sharing class EventFslShiftMgmtTh {
+public with sharing class EventFslShiftMgmtTh extends AbstractFslShiftMgmt {
     private List<Event> newList;
     private List<Event> oldList;
     private Map<Id, Event> newMap;
     private Map<Id, Event> oldMap;
-    private String SHIFT_MANAGEMENT_RECORD_TYPE_NAME = 'Shift_Management'; // @todo -> custom mdt
+
     
     
 
@@ -22,12 +22,16 @@ public with sharing class EventFslShiftMgmtTh {
 
 
     public void execute() {
+        if(recurse_handler)
+            { return; }
+        
         if(newList != null && !newList.isEmpty()) {
             List<Event> toProcess = filter(newList);
             
             if(!toProcess.isEmpty())
                 { execute(toProcess); }
 
+            recurse_handler = true;
             return;
         } else if (oldList != null && !oldList.isEmpty()) {
             List<Event> toProcess = filter(oldList);
@@ -35,10 +39,13 @@ public with sharing class EventFslShiftMgmtTh {
             if(!toProcess.isEmpty())
                 { doDelete(new Map<Id, Event> (toProcess) ); }
 
+            recurse_handler = true;
             return;
         } else {
             filter();
             execute(newMap, oldMap);
+
+            recurse_handler = true;
         }
     }
 
@@ -81,8 +88,6 @@ public with sharing class EventFslShiftMgmtTh {
 
 
     public void doDelete(Map<Id, Event> recordsToDelete) {
-        SavePoint sp = Database.setSavePoint();
-
         Set<String> shiftIds = new Set<String>();
 
         for(Id i : recordsToDelete.keySet()) {
@@ -95,8 +100,6 @@ public with sharing class EventFslShiftMgmtTh {
                     FROM ServiceTerritoryMember
                     WHERE Shift_ID__c IN :shiftIds];
         } catch (Exception e) {
-            Database.rollback(sp);
-            
             // throw error to user
             throw new EventFslShiftMgmtThException('Error deleting records!' + e.getMessage());
         }
