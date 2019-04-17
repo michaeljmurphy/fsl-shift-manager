@@ -96,7 +96,8 @@ public with sharing class StmFslShiftMgmtTh extends AbstractFslShiftMgmt {
                                          , Operating_Hours__c = i.OperatingHoursId
                                          , Service_Territory__c = i.ServiceTerritoryId
                                          , RecordTypeId = rtypeId
-                                         , Shift_ID__c = shiftId));
+                                         , Shift_ID__c = shiftId
+                                         , Subject = DEFAULT_EVENT_SUBJECT));
         }
 
         try {
