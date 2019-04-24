@@ -1,9 +1,3 @@
-# SFDX App
+* FSL Shift Management
 
-## Dev, Build and Test
-
-## Resources
-
-## Description of Files and Directories
-
-## Issues
+This app synchronises Event records with Service Territory Member records in order to achieve basic shift management functionality in Field Service Lightning
