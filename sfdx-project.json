@@ -12,9 +12,7 @@
     "sfdcLoginUrl": "https://login.salesforce.com",
     "sourceApiVersion": "45.0",
     "packageAliases": {
-        "FSLShiftManagement": "0Ho4J000000XZAgSAO"
-    },
-    "dependencies" : {
-        "fsl" : "0330M000001ExoUQAS"
+        "FSLShiftManagement": "0Ho4J000000XZAgSAO",
+        "FSLShiftManagement - 0.1" : "04t4J000000fJQCQA2"
     }
 }
